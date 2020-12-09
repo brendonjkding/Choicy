@@ -77,9 +77,18 @@ NSString* previewStringForSettings(NSDictionary* settings)
 
 %new
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController{
+    static dispatch_once_t once = 0;
+    dispatch_once(&once, ^{
+        NSMutableArray *mutableDescriptors = [NSMutableArray new];
+        for(NSDictionary* desc in self.specifier.properties[@"ALSectionDescriptors"]){
+            NSMutableDictionary *mutableDesc = [desc mutableCopy];
+            mutableDesc[@"orig_predicate"] = mutableDesc[@"predicate"];
+            [mutableDescriptors addObject:mutableDesc];
+        }
+        self.specifier.properties[@"ALSectionDescriptors"]=mutableDescriptors;
+    });
     NSString *searchKey=searchController.searchBar.text;
     for(NSMutableDictionary* desc in self.specifier.properties[@"ALSectionDescriptors"]){
-    if(!desc[@"orig_predicate"]) desc[@"orig_predicate"]=desc[@"predicate"];
         if([searchKey isEqualToString:@""]) {
             desc[@"predicate"]=desc[@"orig_predicate"];
         }
